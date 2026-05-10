@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:EmailAutomation.UI.ViewModels"
+             x:Class="EmailAutomation.UI.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+  <StackPanel Margin="20">
+    <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+    <Grid ColumnDefinitions="*,*" Margin="0,0,0,20">
+      <StackPanel Grid.Column="0">
+        <TextBlock Text="Total Successes" FontSize="16" />
+        <TextBlock Text="{Binding TotalSuccess}" FontSize="32" Foreground="{DynamicResource SystemFillColorSuccessBrush}" />
+      </StackPanel>
+      <StackPanel Grid.Column="1">
+        <TextBlock Text="Total Failures" FontSize="16" />
+        <TextBlock Text="{Binding TotalFailures}" FontSize="32" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+      </StackPanel>
+    </Grid>
+
+    <TextBlock Text="Recent Logs:" FontSize="18" Margin="0,0,0,10"/>
+    <ListBox ItemsSource="{Binding RecentLogs}" Height="200" />
+  </StackPanel>
+</UserControl>

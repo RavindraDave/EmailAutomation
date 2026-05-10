@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EmailAutomation.UI.ViewModels"
+        xmlns:views="using:EmailAutomation.UI.Views"
+        x:Class="EmailAutomation.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Email Automation MVP"
+        Width="1000" Height="700">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="250, *">
+        <!-- Navigation Menu -->
+        <!-- Use DynamicResource so it reacts nicely to Dark/Light themes. By default in Avalonia,
+             forcing a hardcoded #F0F0F0 breaks Dark Mode contrast because TextBlocks will be white by default. -->
+        <Border Grid.Column="0" Background="{DynamicResource SystemRegionBrush}" BorderBrush="{DynamicResource SystemChromeDisabledLowColor}" BorderThickness="0,0,1,0" Padding="10">
+            <StackPanel Spacing="10">
+                <!-- Removed hardcoded colors. They will now inherit the foreground (white or black) automatically based on the system theme -->
+                <TextBlock Text="Menu" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                <Button Content="Dashboard" Command="{Binding NavigateToDashboard}" HorizontalAlignment="Stretch"/>
+                <Button Content="Template Management" Command="{Binding NavigateToTemplates}" HorizontalAlignment="Stretch"/>
+                <Button Content="Batch Execution" Command="{Binding NavigateToBatch}" HorizontalAlignment="Stretch"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" />
+    </Grid>
+</Window>
