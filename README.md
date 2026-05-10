@@ -1,10 +1,10 @@
 # Email Automation
 
-A cross-platform desktop application using .NET 8 and Avalonia UI for bulk email automation. By default, it uses SMTP to send batches of personalized emails with attachments quickly and safely, but can be configured to use the Gmail API directly.
+A cross-platform desktop application using .NET 10 and Avalonia UI for bulk email automation. By default, it uses SMTP to send batches of personalized emails with attachments quickly and safely, but can be configured to use the Gmail API directly.
 
 ## Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - A Gmail account with either an "App Password" (for SMTP) or API Access configured for OAuth.
 
 ## Setup & Configuration
@@ -75,7 +75,7 @@ dotnet publish EmailAutomation.UI/EmailAutomation.UI.csproj -c Release -r linux-
 
 Navigate to the output publish directory and launch the `.exe` (or respective binary for Linux/Mac). Make sure your `appsettings.json` is located in the same directory.
 Example path:
-`EmailAutomation.UI/bin/Release/net8.0/win-x64/publish/EmailAutomation.UI.exe`
+`EmailAutomation.UI/bin/Release/net10.0/win-x64/publish/EmailAutomation.UI.exe`
 
 ## Step-by-Step Usage Guide
 
