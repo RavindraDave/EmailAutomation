@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:EmailAutomation.UI.ViewModels"
+             x:Class="EmailAutomation.UI.Views.TemplateManagementView"
+             x:DataType="vm:TemplateManagementViewModel">
+  <Grid ColumnDefinitions="200,*" Margin="20">
+    <StackPanel Grid.Column="0" Margin="0,0,10,0">
+      <TextBlock Text="Templates" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+      <ListBox ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate}" Height="400">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <Button Content="New Template" Command="{Binding NewTemplateCommand}" Margin="0,10,0,0" HorizontalAlignment="Stretch" />
+    </StackPanel>
+
+    <StackPanel Grid.Column="1" Margin="10,0,0,0" IsEnabled="{Binding SelectedTemplate, Converter={x:Static ObjectConverters.IsNotNull}}">
+      <TextBlock Text="Edit Template" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+
+      <TextBlock Text="Name:" Margin="0,10,0,5" />
+      <TextBox Text="{Binding SelectedTemplate.Name}" />
+
+      <TextBlock Text="Subject:" Margin="0,10,0,5" />
+      <TextBox Text="{Binding SelectedTemplate.SubjectTemplate}" />
+
+      <TextBlock Text="Body (HTML):" Margin="0,10,0,5" />
+      <TextBox Text="{Binding SelectedTemplate.BodyTemplate}" Height="200" AcceptsReturn="True" TextWrapping="Wrap" />
+
+      <Button Content="Save" Command="{Binding SaveTemplateCommand}" Margin="0,20,0,0" HorizontalAlignment="Right" />
+    </StackPanel>
+  </Grid>
+</UserControl>
