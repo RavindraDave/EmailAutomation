@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:EmailAutomation.UI.ViewModels"
+        xmlns:views="using:EmailAutomation.UI.Views"
+        x:Class="EmailAutomation.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Email Automation MVP"
+        Width="1000" Height="700">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="250, *">
+        <!-- Navigation Menu -->
+        <Border Grid.Column="0" Background="#F0F0F0" Padding="10">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Menu" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
+                <Button Content="Dashboard" Command="{Binding NavigateToDashboard}" HorizontalAlignment="Stretch"/>
+                <Button Content="Template Management" Command="{Binding NavigateToTemplates}" HorizontalAlignment="Stretch"/>
+                <Button Content="Batch Execution" Command="{Binding NavigateToBatch}" HorizontalAlignment="Stretch"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <ContentControl Grid.Column="1" Content="{Binding CurrentViewModel}" />
+    </Grid>
+</Window>
