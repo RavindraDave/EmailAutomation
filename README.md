@@ -1,20 +1,46 @@
 # Email Automation
 
-A cross-platform desktop application using .NET 8 and Avalonia UI for bulk email automation utilizing the Gmail API. This application empowers non-technical users to quickly send batches of personalized emails with attachments easily and securely.
+A cross-platform desktop application using .NET 8 and Avalonia UI for bulk email automation. By default, it uses SMTP to send batches of personalized emails with attachments quickly and safely, but can be configured to use the Gmail API directly.
 
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
-- Gmail Account with API Access configured for OAuth.
+- A Gmail account with either an "App Password" (for SMTP) or API Access configured for OAuth.
 
 ## Setup & Configuration
 
-To allow the application to access the Gmail API, you must place your Google OAuth credentials in the application directory:
+Configure the application by modifying `appsettings.json` next to your executable:
 
-1. Obtain a `credentials.json` file from your [Google Cloud Console](https://console.cloud.google.com/). Ensure the OAuth credentials are created for a "Desktop Application" and have the `https://www.googleapis.com/auth/gmail.send` scope.
-2. Place `credentials.json` directly next to your published executable file.
+### Option 1: SMTP (Default)
 
-Upon initial execution, a browser will open prompting you to sign in and grant the application permissions. A `token.json` file will then be generated for subsequent authentications automatically.
+The standard and simplest method uses `smtp.gmail.com`. You must generate an App Password because Google no longer allows basic password authentication.
+
+1. Go to your Google Account -> **Security**.
+2. Enable **2-Step Verification** if not already enabled.
+3. Search for **App passwords** and create a new one (e.g., named "EmailAutomation").
+4. Copy the generated 16-character password and update your `appsettings.json`:
+
+```json
+{
+  "EmailProvider": "SMTP",
+  "SMTP": {
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "Username": "your_email@gmail.com",
+    "Password": "your_app_password"
+  }
+}
+```
+
+### Option 2: Gmail API (OAuth)
+
+If you require the Gmail API approach instead:
+
+1. Update `appsettings.json` and change `"EmailProvider"` from `"SMTP"` to `"GmailAPI"`.
+2. Obtain a `credentials.json` file from your [Google Cloud Console](https://console.cloud.google.com/). Ensure the OAuth credentials are created for a "Desktop Application" and have the `https://www.googleapis.com/auth/gmail.send` scope.
+3. Place `credentials.json` directly next to your published executable file.
+
+Upon initial execution, a browser will open prompting you to sign in and grant permissions. A `token.json` file will then be automatically generated.
 
 ## How to Build & Run
 
@@ -47,7 +73,7 @@ dotnet publish EmailAutomation.UI/EmailAutomation.UI.csproj -c Release -r linux-
 
 ### Running the Application
 
-Navigate to the output publish directory and launch the `.exe` (or respective binary for Linux/Mac).
+Navigate to the output publish directory and launch the `.exe` (or respective binary for Linux/Mac). Make sure your `appsettings.json` is located in the same directory.
 Example path:
 `EmailAutomation.UI/bin/Release/net8.0/win-x64/publish/EmailAutomation.UI.exe`
 
@@ -78,7 +104,7 @@ Any other custom column created (e.g., `InvoiceNo`) will be usable as `{{Invoice
 4. Click **Start** to begin sending out emails. The status will update the Progress Bar and write logs per-execution. Logs can be checked later in the `logs/emailautomation.log` directory and Dashboard.
 
 ## Features Currently Implemented (MVP)
-- Send automated batch emails through the Gmail API directly.
+- Send automated batch emails through standard SMTP or the Gmail API directly.
 - Template engine dynamic variable insertion powered by [Scriban](https://github.com/scriban/scriban).
 - Local SQLite database ensuring template states persist.
 - Graceful transient network error handling and retries enabled by [Polly](https://github.com/App-vNext/Polly).
