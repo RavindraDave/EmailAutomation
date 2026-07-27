@@ -8,18 +8,18 @@
         Title="Email Automation MVP"
         Width="1000" Height="700">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+    <!-- No Design.DataContext: MainWindowViewModel requires DI (IServiceProvider) and has no
+         parameterless constructor, so design-time preview isn't available for this window. -->
 
     <Grid ColumnDefinitions="250, *">
         <!-- Navigation Menu -->
         <Border Grid.Column="0" Background="#F0F0F0" Padding="10">
-            <StackPanel Spacing="10">
+            <StackPanel Spacing="10" TextElement.Foreground="#1A1A1A">
                 <TextBlock Text="Menu" FontSize="20" FontWeight="Bold" Margin="0,0,0,20"/>
                 <Button Content="Dashboard" Command="{Binding NavigateToDashboard}" HorizontalAlignment="Stretch"/>
                 <Button Content="Template Management" Command="{Binding NavigateToTemplates}" HorizontalAlignment="Stretch"/>
                 <Button Content="Batch Execution" Command="{Binding NavigateToBatch}" HorizontalAlignment="Stretch"/>
+                <Button Content="Settings" Command="{Binding NavigateToSettings}" HorizontalAlignment="Stretch"/>
             </StackPanel>
         </Border>
 

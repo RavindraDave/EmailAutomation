@@ -1,0 +1,100 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:EmailAutomation.UI.ViewModels"
+             xmlns:conv="using:EmailAutomation.UI.Converters"
+             x:Class="EmailAutomation.UI.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+  <UserControl.Resources>
+    <conv:BoolToStatusBrushConverter x:Key="BoolToStatusBrushConverter"/>
+  </UserControl.Resources>
+
+  <ScrollViewer>
+    <StackPanel Margin="20" Spacing="16" MaxWidth="560" HorizontalAlignment="Left">
+      <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold"/>
+      <TextBlock Text="Configure how this app sends email. Your password is never stored in plain text - it is encrypted using your operating system's credential store."
+                 TextWrapping="Wrap" Opacity="0.7"/>
+
+      <StackPanel Spacing="4">
+        <TextBlock Text="Send using" FontWeight="SemiBold"/>
+        <ComboBox ItemsSource="{Binding Providers}" SelectedItem="{Binding Provider}" HorizontalAlignment="Stretch"
+                  ToolTip.Tip="SMTP is the simplest option and works with a Gmail App Password. Gmail API requires a Google Cloud OAuth credentials file."/>
+      </StackPanel>
+
+      <!-- SMTP settings -->
+      <StackPanel Spacing="10" IsVisible="{Binding IsSmtp}">
+        <TextBlock Text="SMTP Settings" FontWeight="SemiBold" FontSize="16"/>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Host"/>
+          <TextBox Text="{Binding SmtpHost}" ToolTip.Tip="Your email provider's SMTP server address."/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Port"/>
+          <NumericUpDown Value="{Binding SmtpPort}" Minimum="1" Maximum="65535" FormatString="0"
+                          ToolTip.Tip="587 is the standard port for STARTTLS (recommended)."/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Email address"/>
+          <TextBox Text="{Binding Username}" PlaceholderText="you@example.com"/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Display name (optional)"/>
+          <TextBox Text="{Binding FromDisplayName}" PlaceholderText="Jane Doe"
+                    ToolTip.Tip="Shown as the sender name in recipients' inboxes."/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="App password"/>
+          <TextBox Text="{Binding Password}" PasswordChar="•" PlaceholderText="Leave blank to keep the saved password"
+                    ToolTip.Tip="Use a 16-character Gmail App Password, not your regular account password. Generate one under Google Account → Security → App passwords."/>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Gmail API settings -->
+      <StackPanel Spacing="10" IsVisible="{Binding IsGmailApi}">
+        <TextBlock Text="Gmail API Settings" FontWeight="SemiBold" FontSize="16"/>
+        <TextBlock TextWrapping="Wrap" Opacity="0.7"
+                   Text="Requires a credentials.json OAuth client file from the Google Cloud Console with the gmail.send scope. The first Test Connection or send will open a browser to sign in."/>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Credentials file path"/>
+          <TextBox Text="{Binding CredentialsPath}"/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Token cache path"/>
+          <TextBox Text="{Binding TokenPath}"/>
+        </StackPanel>
+      </StackPanel>
+
+      <!-- Sending limits -->
+      <StackPanel Spacing="10">
+        <TextBlock Text="Sending Limits" FontWeight="SemiBold" FontSize="16"/>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Delay between emails (milliseconds)"/>
+          <NumericUpDown Value="{Binding DelayBetweenSendsMs}" Minimum="0" Maximum="60000" FormatString="0"
+                          ToolTip.Tip="A short pause between sends reduces the chance of your account being rate-limited."/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+          <TextBlock Text="Maximum emails per day"/>
+          <NumericUpDown Value="{Binding DailySendCap}" Minimum="1" Maximum="100000" FormatString="0"
+                          ToolTip.Tip="Gmail consumer accounts are typically limited to around 500 emails per day. Staying under this avoids temporary account locks."/>
+        </StackPanel>
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <Button Content="Test Connection" Command="{Binding TestConnectionCommand}" IsEnabled="{Binding !IsBusy}"/>
+        <Button Content="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding !IsBusy}"/>
+      </StackPanel>
+
+      <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap"
+                 Foreground="{Binding LastTestSucceeded, Converter={StaticResource BoolToStatusBrushConverter}}"/>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

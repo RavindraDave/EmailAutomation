@@ -1,110 +1,104 @@
 # Email Automation
 
-A cross-platform desktop application using .NET 10 and Avalonia UI for bulk email automation. By default, it uses SMTP to send batches of personalized emails with attachments quickly and safely, but can be configured to use the Gmail API directly.
+A cross-platform desktop application (Windows and macOS) for bulk email automation, built with .NET 10 and Avalonia UI. Send personalized batches of email from an Excel spreadsheet via SMTP (Gmail App Password) or the Gmail API, with a safety-first workflow: preview before you send, throttle to avoid provider rate limits, resume an interrupted batch without duplicate sends, and export a report afterward.
 
-## Prerequisites
+## Installing
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
-- A Gmail account with either an "App Password" (for SMTP) or API Access configured for OAuth.
+Download the build for your platform from the project's [Releases](../../releases) page (or build it yourself - see [Building & Packaging](#building--packaging) below).
 
-## Setup & Configuration
+- **Windows**: unzip and run `EmailAutomation.UI.exe`. No .NET installation required (it's self-contained).
+- **macOS (Apple Silicon)**: unzip `EmailAutomation.app` and drag it into `Applications`, or run it in place.
+  - Because this build isn't code-signed/notarized, macOS Gatekeeper blocks the first launch. **Right-click the app and choose "Open"**, then confirm in the dialog that appears. (Alternatively, run `xattr -dr com.apple.quarantine /path/to/EmailAutomation.app` in Terminal.) You only need to do this once.
 
-Configure the application by modifying `appsettings.json` next to your executable:
+All of your data - settings, the local database, and logs - lives outside the install folder in your per-user application data directory (`%APPDATA%\EmailAutomation` on Windows, `~/Library/Application Support/EmailAutomation` on macOS), so updating the app in place never touches your templates or history.
 
-### Option 1: SMTP (Default)
+## First-Time Setup
 
-The standard and simplest method uses `smtp.gmail.com`. You must generate an App Password because Google no longer allows basic password authentication.
-
-1. Go to your Google Account -> **Security**.
-2. Enable **2-Step Verification** if not already enabled.
-3. Search for **App passwords** and create a new one (e.g., named "EmailAutomation").
-4. Copy the generated 16-character password and update your `appsettings.json`:
-
-```json
-{
-  "EmailProvider": "SMTP",
-  "SMTP": {
-    "Host": "smtp.gmail.com",
-    "Port": 587,
-    "Username": "your_email@gmail.com",
-    "Password": "your_app_password"
-  }
-}
-```
-
-### Option 2: Gmail API (OAuth)
-
-If you require the Gmail API approach instead:
-
-1. Update `appsettings.json` and change `"EmailProvider"` from `"SMTP"` to `"GmailAPI"`.
-2. Obtain a `credentials.json` file from your [Google Cloud Console](https://console.cloud.google.com/). Ensure the OAuth credentials are created for a "Desktop Application" and have the `https://www.googleapis.com/auth/gmail.send` scope.
-3. Place `credentials.json` directly next to your published executable file.
-
-Upon initial execution, a browser will open prompting you to sign in and grant permissions. A `token.json` file will then be automatically generated.
-
-## How to Build & Run
-
-### Building the Project Locally
-
-Clone the repository and run the build command from the root directory:
-
-```bash
-dotnet build
-```
-
-### Creating a Self-Contained Deployment
-
-If you want a standalone executable that doesn't require .NET to be installed globally on a target machine, you can publish a self-contained release:
-
-**For Windows (x64):**
-```bash
-dotnet publish EmailAutomation.UI/EmailAutomation.UI.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
-```
-
-**For macOS (ARM64):**
-```bash
-dotnet publish EmailAutomation.UI/EmailAutomation.UI.csproj -c Release -r osx-arm64 --self-contained true -p:PublishSingleFile=true
-```
-
-**For Linux (x64):**
-```bash
-dotnet publish EmailAutomation.UI/EmailAutomation.UI.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
-```
-
-### Running the Application
-
-Navigate to the output publish directory and launch the `.exe` (or respective binary for Linux/Mac). Make sure your `appsettings.json` is located in the same directory.
-Example path:
-`EmailAutomation.UI/bin/Release/net10.0/win-x64/publish/EmailAutomation.UI.exe`
+1. Launch the app and open the **Settings** tab.
+2. Choose your provider:
+   - **SMTP (recommended)** - works with any Gmail account. You'll need a Google **App Password**, not your normal password:
+     1. Go to your Google Account → **Security**.
+     2. Enable **2-Step Verification** if it isn't already on.
+     3. Search for **App passwords** and create one (e.g. named "Email Automation").
+     4. Enter your Gmail address and the 16-character app password into the Settings screen.
+   - **Gmail API (OAuth)** - for advanced use. Requires a `credentials.json` OAuth client file from the [Google Cloud Console](https://console.cloud.google.com/) with the `gmail.send` scope; point Settings at its path. The first Test Connection or send opens a browser to sign in, then caches a token.
+3. Set your **sending limits**: a delay between emails (a second or two is plenty) and a daily send cap (Gmail consumer accounts are limited to roughly 500/day - staying under that avoids temporary account locks).
+4. Click **Test Connection** to confirm everything works before you rely on it.
+5. Click **Save**. Your password is encrypted using your operating system's credential store (Keychain on macOS, DPAPI on Windows) - it is never written to disk in plain text.
 
 ## Step-by-Step Usage Guide
 
-### 1. Template Management
-Before starting a batch, define an email template:
-1. Navigate to the **Template Management** tab using the side menu.
-2. Click **New Template**.
-3. Name your template, create a default subject, and compose your body text.
-4. You can utilize placeholders matching your Excel headers wrapped in double curly braces (e.g. `Hello {{FirstName}}, ...`).
-5. Click **Save** to store it in your local SQLite database.
+### 1. Get the Excel template
 
-### 2. Prepare the Excel File
-The system imports from `.xlsx` files format with minimum required columns:
-- **To** (Recipient Email Address)
-- **Cc** (Optional)
-- **Subject** (Optional, overrides your Template Subject per-row)
-- **AttachmentPath** (Optional absolute file path)
-- **IsEnabled** (Optional boolean `true`/`false`. Disables specific row processing)
+On the **Batch Execution** tab, click **Download Sample Template** to save a ready-to-fill-in `.xlsx` with the columns this app expects:
 
-Any other custom column created (e.g., `InvoiceNo`) will be usable as `{{InvoiceNo}}` within your templates.
+| Column | Required? | Purpose |
+|---|---|---|
+| `To` | Yes | Recipient email address |
+| `Cc` | No | Optional CC address |
+| `Subject` | No | Overrides the template's default subject for this row only |
+| `AttachmentPath` | No | Absolute path to a file to attach |
+| `IsEnabled` | No | `TRUE`/`FALSE` - set `FALSE` to skip a row without deleting it |
 
-### 3. Batch Execution
-1. Navigate to the **Batch Execution** tab.
-2. Click **Browse...** to select the prepared `.xlsx` input file.
-3. Select the template you designed from the dropdown.
-4. Click **Start** to begin sending out emails. The status will update the Progress Bar and write logs per-execution. Logs can be checked later in the `logs/emailautomation.log` directory and Dashboard.
+Any other column you add (e.g. `FirstName`, `InvoiceNo`) becomes usable in your templates as `{{ColumnName}}`.
 
-## Features Currently Implemented (MVP)
-- Send automated batch emails through standard SMTP or the Gmail API directly.
-- Template engine dynamic variable insertion powered by [Scriban](https://github.com/scriban/scriban).
-- Local SQLite database ensuring template states persist.
-- Graceful transient network error handling and retries enabled by [Polly](https://github.com/App-vNext/Polly).
+### 2. Create a template
+
+In **Template Management**, click **New Template**, give it a name, write a default subject, and compose the body using `{{ColumnName}}` placeholders that match your spreadsheet's headers. Click **Save**.
+
+### 3. Preview before you send
+
+Back in **Batch Execution**, select your Excel file and template, then click **Preview / Validate**. This checks every row - without sending anything - for invalid email addresses, missing attachments, and placeholders that don't match any column (the most common mistake, since an unmatched placeholder silently sends a blank field rather than an error). Fix anything flagged, then re-run Preview. **Start** is disabled until validation passes clean.
+
+### 4. Send, pause, or stop
+
+Click **Start**. The progress bar and status line update per row as it sends. **Pause** holds the batch in place (nothing more is sent until you **Resume**); **Stop** halts after the current email finishes. Progress is saved continuously, so if you stop, close the app, or it's interrupted, relaunching the same file and template offers to **resume** - already-sent rows are skipped, not re-sent.
+
+### 5. Review results
+
+The **Dashboard** shows overall sent/failed totals and a history of recent runs. Select a run and click **Export Report (CSV)** to save a per-recipient log (status, attempts, error messages, timestamps) for your records.
+
+## Building & Packaging
+
+Requires the [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
+
+```bash
+dotnet build     # build everything
+dotnet test      # run the test suite
+```
+
+### Windows (x64)
+
+```bash
+./packaging/windows/publish-windows.sh
+```
+
+Produces a single self-contained `EmailAutomation.UI.exe` at `publish/win-x64/` - no separate .NET install needed on the target machine.
+
+### macOS (Apple Silicon)
+
+```bash
+./packaging/macos/build-app-bundle.sh
+```
+
+Publishes a self-contained build and assembles it into a double-clickable `publish/EmailAutomation.app`, including an icon generated from `EmailAutomation.UI/Assets/avalonia-logo.ico`. This bundle is unsigned - see the Gatekeeper note under [Installing](#installing) before distributing it. Proper code signing (an Apple Developer ID, $99/yr) plus notarization is the natural next step if you're distributing to non-technical users at scale; it's out of scope for this build.
+
+Both scripts can be run from any OS, since .NET's publish supports cross-compiling to another platform's runtime identifier.
+
+## Architecture
+
+- `EmailAutomation.Domain` - plain models (`EmailJob`, `EmailTemplate`, `BatchRun`, `EmailLog`, `AppSettings`, ...), no dependencies.
+- `EmailAutomation.Application` - business logic and the interfaces Infrastructure implements: `BatchExecutionService` (runs a batch with throttling/pause/cancel/resume), `BatchValidationService` (dry-run checks), `IRepository`, `ISettingsService`, etc.
+- `EmailAutomation.Infrastructure` - concrete implementations: SQLite persistence (Dapper), Excel I/O (ClosedXML), the Scriban template engine, SMTP/Gmail senders (MailKit/Google APIs, with Polly retries), and OS-native credential storage.
+- `EmailAutomation.UI` - the Avalonia desktop app (MVVM, dependency-injected).
+- `EmailAutomation.Tests` - xUnit test suite.
+
+## Features
+
+- Send batch emails via SMTP or the Gmail API, with retry on transient failures.
+- Dry-run validation before sending: bad addresses, missing attachments, and unmatched template placeholders are all caught up front.
+- Configurable throttling and a daily send cap to stay within provider rate limits.
+- Pause, resume, and stop mid-batch; an interrupted run can be resumed later without re-sending already-delivered emails.
+- Per-run history and CSV export from the Dashboard.
+- Credentials encrypted via the OS credential store (Keychain / DPAPI), never stored in plain text.
+- Local SQLite database for templates, run history, and per-recipient logs.

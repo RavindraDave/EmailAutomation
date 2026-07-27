@@ -1,9 +1,12 @@
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using EmailAutomation.Application.Services;
 using EmailAutomation.Domain.Models;
+using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Gmail.v1.Data;
@@ -21,6 +24,7 @@ public class GmailSender : IEmailSender
     private readonly string _credentialsPath;
     private readonly string _tokenPath;
     private readonly AsyncRetryPolicy _retryPolicy;
+    private GmailService? _service;
 
     public GmailSender(string credentialsPath, string tokenPath)
     {
@@ -71,6 +75,13 @@ public class GmailSender : IEmailSender
 
     private async Task<GmailService> GetGmailServiceAsync()
     {
+        // The OAuth flow (including any interactive browser consent) only needs to run once per
+        // process - reuse the authenticated service instead of re-authorizing on every send.
+        if (_service != null)
+        {
+            return _service;
+        }
+
         using var stream = new FileStream(_credentialsPath, FileMode.Open, FileAccess.Read);
         var credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
             GoogleClientSecrets.FromStream(stream).Secrets,
@@ -79,11 +90,13 @@ public class GmailSender : IEmailSender
             CancellationToken.None,
             new FileDataStore(_tokenPath, true));
 
-        return new GmailService(new BaseClientService.Initializer()
+        _service = new GmailService(new BaseClientService.Initializer()
         {
             HttpClientInitializer = credential,
             ApplicationName = "EmailAutomation",
         });
+
+        return _service;
     }
 
     private MimeMessage CreateMimeMessage(EmailJob job, string subject, string bodyHtml)
@@ -121,8 +134,31 @@ public class GmailSender : IEmailSender
             .Replace("=", "");
     }
 
-    private bool IsTransientError(Exception ex)
+    // internal (not private) + InternalsVisibleTo so this retry-classification logic can be unit
+    // tested directly - GmailSender otherwise makes real OAuth/HTTP calls with no seam to mock.
+    internal bool IsTransientError(Exception ex)
     {
-        return true;
+        if (ex is GoogleApiException apiEx)
+        {
+            var statusCode = apiEx.HttpStatusCode;
+
+            // Bad/expired/revoked credentials or insufficient permission - retrying won't help.
+            if (statusCode == HttpStatusCode.Unauthorized || statusCode == HttpStatusCode.Forbidden)
+            {
+                return false;
+            }
+
+            // Rate-limited or server-side failures are worth retrying.
+            if (statusCode == (HttpStatusCode)429 || (int)statusCode >= 500)
+            {
+                return true;
+            }
+
+            // Other 4xx responses (bad request, not found, etc.) are permanent failures.
+            return false;
+        }
+
+        // Network-level failures are worth a retry.
+        return ex is HttpRequestException or IOException or TimeoutException or TaskCanceledException;
     }
 }

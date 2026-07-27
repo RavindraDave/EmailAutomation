@@ -2,8 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using EmailAutomation.Application.Services;
 using EmailAutomation.Domain.Models;
-using EmailAutomation.Infrastructure.Database;
 
 namespace EmailAutomation.UI.ViewModels;
 
