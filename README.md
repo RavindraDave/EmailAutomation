@@ -4,11 +4,13 @@ A cross-platform desktop application (Windows and macOS) for bulk email automati
 
 ## Installing
 
-Download the build for your platform from the project's [Releases](../../releases) page (or build it yourself - see [Building & Packaging](#building--packaging) below).
+Download the build for your platform (v1.0.0), or build it yourself - see [Building & Packaging](#building--packaging) below. All releases are listed on the [Releases](../../releases) page.
 
-- **Windows**: unzip and run `EmailAutomation.UI.exe`. No .NET installation required (it's self-contained).
-- **macOS (Apple Silicon)**: unzip `EmailAutomation.app` and drag it into `Applications`, or run it in place.
+- **Windows (x64)**: [EmailAutomation-win-x64.zip](https://github.com/RavindraDave/EmailAutomation/releases/download/v1.0.0/EmailAutomation-win-x64.zip) - unzip and run `EmailAutomation.UI.exe`. No .NET installation required (it's self-contained).
+- **macOS (Apple Silicon)**: [EmailAutomation-macOS-arm64.zip](https://github.com/RavindraDave/EmailAutomation/releases/download/v1.0.0/EmailAutomation-macOS-arm64.zip) - unzip `EmailAutomation.app` and drag it into `Applications`, or run it in place.
   - Because this build isn't code-signed/notarized, macOS Gatekeeper blocks the first launch. **Right-click the app and choose "Open"**, then confirm in the dialog that appears. (Alternatively, run `xattr -dr com.apple.quarantine /path/to/EmailAutomation.app` in Terminal.) You only need to do this once.
+
+For a longer, screenshot-illustrated walkthrough, see the [User Guide](https://app.notion.com/p/3aa94476928181968eaad7eff3bf4981).
 
 All of your data - settings, the local database, and logs - lives outside the install folder in your per-user application data directory (`%APPDATA%\EmailAutomation` on Windows, `~/Library/Application Support/EmailAutomation` on macOS), so updating the app in place never touches your templates or history.
 
