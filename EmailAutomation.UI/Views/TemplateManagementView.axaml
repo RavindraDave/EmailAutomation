@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:EmailAutomation.UI.ViewModels"
+             xmlns:models="using:EmailAutomation.Domain.Models"
              x:Class="EmailAutomation.UI.Views.TemplateManagementView"
              x:DataType="vm:TemplateManagementViewModel">
   <Grid ColumnDefinitions="200,*" Margin="20">
@@ -8,7 +9,7 @@
       <TextBlock Text="Templates" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
       <ListBox ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate}" Height="400">
         <ListBox.ItemTemplate>
-          <DataTemplate>
+          <DataTemplate x:DataType="models:EmailTemplate">
             <TextBlock Text="{Binding Name}" />
           </DataTemplate>
         </ListBox.ItemTemplate>

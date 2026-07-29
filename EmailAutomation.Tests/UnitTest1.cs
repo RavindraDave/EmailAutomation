@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using EmailAutomation.Application.Services;
 using EmailAutomation.Domain.Models;
@@ -62,11 +61,32 @@ public class BatchExecutionServiceTests
         mockEmailSender.Setup(x => x.SendEmailAsync(It.IsAny<EmailJob>(), It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync(new SendResult { Success = true });
 
-        var service = new BatchExecutionService(mockExcelReader.Object, mockTemplateEngine.Object, mockEmailSender.Object);
+        var mockSenderFactory = new Mock<IEmailSenderFactory>();
+        mockSenderFactory.Setup(x => x.Create(It.IsAny<AppSettings>())).Returns(mockEmailSender.Object);
+
+        var mockSettingsService = new Mock<ISettingsService>();
+        // DelayBetweenSendsMs = 0 keeps this test fast - throttle timing has its own dedicated test.
+        mockSettingsService.Setup(x => x.LoadAsync()).ReturnsAsync(new AppSettings { DelayBetweenSendsMs = 0 });
+
+        var mockRepository = new Mock<IRepository>();
+        mockRepository.Setup(r => r.CreateBatchRunAsync(It.IsAny<BatchRun>())).ReturnsAsync(Guid.NewGuid());
+        mockRepository.Setup(r => r.CountSentSinceAsync(It.IsAny<DateTime>())).ReturnsAsync(0);
+        mockRepository.Setup(r => r.UpsertEmailLogAsync(It.IsAny<EmailLog>())).Returns(Task.CompletedTask);
+        mockRepository.Setup(r => r.GetLogsForBatchAsync(It.IsAny<Guid>())).ReturnsAsync(new List<EmailLog>
+        {
+            new() { Status = EmailLogStatus.Sent },
+            new() { Status = EmailLogStatus.Sent },
+        });
+        mockRepository
+            .Setup(r => r.CompleteBatchRunAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()))
+            .Returns(Task.CompletedTask);
+
+        var service = new BatchExecutionService(mockExcelReader.Object, mockTemplateEngine.Object, mockSenderFactory.Object, mockSettingsService.Object, mockRepository.Object);
         var template = new EmailTemplate { SubjectTemplate = "SubjectTmpl", BodyTemplate = "BodyTmpl" };
 
         // Act
-        await service.ExecuteBatchAsync("dummy.xlsx", template, CancellationToken.None);
+        var request = new BatchRequest { ExcelFilePath = "dummy.xlsx", Template = template };
+        var summary = await service.ExecuteBatchAsync(request);
 
         // Assert
         mockEmailSender.Verify(x => x.SendEmailAsync(
@@ -80,5 +100,7 @@ public class BatchExecutionServiceTests
             "Subject 2_rendered",
             "BodyTmpl_rendered"
         ), Times.Once);
+
+        Assert.Equal(BatchRunStatus.Completed, summary.Status);
     }
 }

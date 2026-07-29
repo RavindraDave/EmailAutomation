@@ -11,14 +11,21 @@
     <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.68.0.3287" />
     <PackageReference Include="MailKit" Version="4.16.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.10" />
+    <!-- Microsoft.Data.Sqlite 10.0.10 pulls in a vulnerable e_sqlite3 (GHSA-2m69-gcr7-jv3q, fixed in 2.1.12+); pin the patched native lib directly. -->
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
     <PackageReference Include="MimeKit" Version="4.16.0" />
     <PackageReference Include="Polly" Version="8.4.0" />
-    <PackageReference Include="Scriban" Version="7.1.0" />
+    <PackageReference Include="Scriban" Version="7.2.5" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.10" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EmailAutomation.Application\EmailAutomation.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EmailAutomation.Tests" />
   </ItemGroup>
 
 </Project>

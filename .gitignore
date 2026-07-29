@@ -2,3 +2,19 @@
 [Oo]bj/
 **/[Bb]in/
 **/[Oo]bj/
+
+# Runtime data / secrets - never commit real user data or credentials
+*.db
+*.db-shm
+*.db-wal
+appsettings.json
+credentials.json
+token.json
+publish/
+
+# Local scratch files for manual testing - never commit real documents
+Sample/
+
+# OS / editor cruft
+.DS_Store
+.claude/settings.local.json

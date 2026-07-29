@@ -1,33 +1,94 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:EmailAutomation.UI.ViewModels"
+             xmlns:models="using:EmailAutomation.Domain.Models"
+             xmlns:appsvc="using:EmailAutomation.Application.Services"
              x:Class="EmailAutomation.UI.Views.BatchExecutionView"
              x:DataType="vm:BatchExecutionViewModel">
-  <StackPanel Margin="20">
-    <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+  <ScrollViewer>
+    <StackPanel Margin="20" Spacing="4" MaxWidth="700">
+      <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
 
-    <TextBlock Text="Excel File:" Margin="0,0,0,5" />
-    <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,20">
-      <TextBox Grid.Column="0" Text="{Binding ExcelFilePath}" />
-      <Button Grid.Column="1" Content="Browse..." Margin="10,0,0,0" />
-    </Grid>
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0" Text="Excel File:" Margin="0,0,0,5" />
+        <Button Grid.Column="1" Content="Download Sample Template" Command="{Binding DownloadSampleTemplateCommand}"
+                Background="Transparent" BorderThickness="0" Foreground="DodgerBlue"
+                Padding="0" Margin="0,0,0,5" Cursor="Hand"
+                ToolTip.Tip="Save a ready-to-fill-in .xlsx with the columns this app expects (To, Cc, Subject, AttachmentPath, IsEnabled, plus example custom columns)."/>
+      </Grid>
+      <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,20">
+        <TextBox Grid.Column="0" Text="{Binding ExcelFilePath}" IsEnabled="{Binding !IsRunning}"/>
+        <Button Grid.Column="1" Content="Browse..." Command="{Binding BrowseCommand}" Margin="10,0,0,0" IsEnabled="{Binding !IsRunning}"/>
+      </Grid>
 
-    <TextBlock Text="Template Selection:" Margin="0,0,0,5"/>
-    <ComboBox ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate}" Margin="0,0,0,20" HorizontalAlignment="Stretch">
-      <ComboBox.ItemTemplate>
-        <DataTemplate>
-          <TextBlock Text="{Binding Name}" />
-        </DataTemplate>
-      </ComboBox.ItemTemplate>
-    </ComboBox>
+      <TextBlock Text="Template Selection:" Margin="0,0,0,5"/>
+      <ComboBox ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate}"
+                IsEnabled="{Binding !IsRunning}" Margin="0,0,0,20" HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="models:EmailTemplate">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
 
-    <ProgressBar Value="{Binding ProgressValue}" Height="20" Margin="0,0,0,20" />
+      <Button Content="Preview / Validate" Command="{Binding PreviewCommand}" IsEnabled="{Binding !IsRunning}"
+              HorizontalAlignment="Left" Margin="0,0,0,10"
+              ToolTip.Tip="Checks every row for bad email addresses, missing attachments, and template placeholders that won't fill in - without sending anything."/>
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-      <Button Content="Start" IsEnabled="{Binding !IsRunning}" Command="{Binding StartBatchCommand}" />
-      <Button Content="Pause" IsEnabled="{Binding IsRunning}" Command="{Binding PauseBatch}" />
-      <Button Content="Resume" IsEnabled="{Binding !IsRunning}" Command="{Binding ResumeBatch}" />
-      <Button Content="Stop" IsEnabled="{Binding IsRunning}" Command="{Binding StopBatch}" />
+      <TextBlock Text="{Binding ValidationSummary}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,5"
+                 IsVisible="{Binding ValidationSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+
+      <ItemsControl ItemsSource="{Binding ValidationIssues}" Margin="0,0,0,10">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Text="{Binding}" Foreground="IndianRed" TextWrapping="Wrap" Margin="0,0,0,2"/>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <ItemsControl ItemsSource="{Binding PreviewRows}" Margin="0,0,0,10">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="appsvc:RowPreview">
+            <Border BorderBrush="Gray" BorderThickness="0,0,0,1" Padding="0,6">
+              <StackPanel Spacing="2">
+                <TextBlock Text="{Binding To, StringFormat='To: {0}'}" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding RenderedSubject, StringFormat='Subject: {0}'}" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding RenderedBody}" TextWrapping="Wrap" Opacity="0.8" MaxHeight="60"/>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <!-- Resume prompt: shown when an interrupted run of this same file+template is found -->
+      <Border IsVisible="{Binding HasPendingResumePrompt}" Background="#FFF3CD" Padding="12" Margin="0,0,0,15" CornerRadius="4">
+        <StackPanel Spacing="8" TextElement.Foreground="#664D03">
+          <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap"/>
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Button Content="Resume Previous Run" Command="{Binding ResumePreviousRunCommand}"/>
+            <Button Content="Start Fresh" Command="{Binding StartFreshCommand}"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <ProgressBar Value="{Binding ProgressValue}" Height="20" Margin="0,0,0,10" />
+      <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" Margin="0,0,0,10"
+                 IsVisible="{Binding !HasPendingResumePrompt}"/>
+
+      <StackPanel Orientation="Horizontal" Spacing="20" Margin="0,0,0,20">
+        <TextBlock Text="{Binding SucceededCount, StringFormat='Sent: {0}'}" Foreground="SeaGreen"/>
+        <TextBlock Text="{Binding FailedCount, StringFormat='Failed: {0}'}" Foreground="IndianRed"/>
+        <TextBlock Text="{Binding SkippedCount, StringFormat='Skipped: {0}'}" Opacity="0.7"/>
+      </StackPanel>
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+        <Button Content="Start" IsEnabled="{Binding CanStart}" Command="{Binding StartBatchCommand}"
+                ToolTip.Tip="Sends every enabled row in the Excel file using the selected template. Requires a successful Preview / Validate first."/>
+        <Button Content="Pause" IsEnabled="{Binding CanPause}" Command="{Binding PauseBatchCommand}"/>
+        <Button Content="Resume" IsEnabled="{Binding CanResume}" Command="{Binding ResumeBatchCommand}"/>
+        <Button Content="Stop" IsEnabled="{Binding IsRunning}" Command="{Binding StopBatchCommand}"
+                ToolTip.Tip="Stops after the current email finishes sending. Progress made so far is saved and can be resumed later."/>
+      </StackPanel>
     </StackPanel>
-  </StackPanel>
+  </ScrollViewer>
 </UserControl>

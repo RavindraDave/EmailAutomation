@@ -99,7 +99,8 @@ public class SmtpEmailSender : IEmailSender
         return message;
     }
 
-    private bool IsTransientError(Exception ex)
+    // internal (not private) + InternalsVisibleTo so this retry-classification logic is unit tested directly.
+    internal bool IsTransientError(Exception ex)
     {
         if (ex is AuthenticationException) return false;
 

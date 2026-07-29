@@ -1,23 +1,50 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:EmailAutomation.UI.ViewModels"
+             xmlns:models="using:EmailAutomation.Domain.Models"
+             xmlns:conv="using:EmailAutomation.UI.Converters"
              x:Class="EmailAutomation.UI.Views.DashboardView"
              x:DataType="vm:DashboardViewModel">
-  <StackPanel Margin="20">
-    <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
 
-    <Grid ColumnDefinitions="*,*" Margin="0,0,0,20">
+  <UserControl.Resources>
+    <conv:PathToFileNameConverter x:Key="PathToFileNameConverter"/>
+  </UserControl.Resources>
+
+  <StackPanel Margin="20" Spacing="10">
+    <Grid ColumnDefinitions="*,Auto">
+      <TextBlock Grid.Column="0" Text="{Binding Title}" FontSize="24" FontWeight="Bold"/>
+      <Button Grid.Column="1" Content="Refresh" Command="{Binding RefreshCommand}"/>
+    </Grid>
+
+    <Grid ColumnDefinitions="*,*" Margin="0,10,0,20">
       <StackPanel Grid.Column="0">
-        <TextBlock Text="Total Successes" FontSize="16" />
-        <TextBlock Text="{Binding TotalSuccess}" FontSize="32" Foreground="Green" />
+        <TextBlock Text="Total Sent" FontSize="16" />
+        <TextBlock Text="{Binding TotalSuccess}" FontSize="32" Foreground="SeaGreen" />
       </StackPanel>
       <StackPanel Grid.Column="1">
-        <TextBlock Text="Total Failures" FontSize="16" />
-        <TextBlock Text="{Binding TotalFailures}" FontSize="32" Foreground="Red" />
+        <TextBlock Text="Total Failed" FontSize="16" />
+        <TextBlock Text="{Binding TotalFailures}" FontSize="32" Foreground="IndianRed" />
       </StackPanel>
     </Grid>
 
-    <TextBlock Text="Recent Logs:" FontSize="18" Margin="0,0,0,10"/>
-    <ListBox ItemsSource="{Binding RecentLogs}" Height="200" />
+    <TextBlock Text="Recent Batch Runs:" FontSize="18" Margin="0,0,0,10"/>
+    <ListBox ItemsSource="{Binding RecentRuns}" SelectedItem="{Binding SelectedRun}" Height="260">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="models:BatchRun">
+          <Grid ColumnDefinitions="2*,Auto,Auto,Auto,Auto" Margin="0,4">
+            <TextBlock Grid.Column="0" Text="{Binding ExcelFilePath, Converter={StaticResource PathToFileNameConverter}}" ToolTip.Tip="{Binding ExcelFilePath}"/>
+            <TextBlock Grid.Column="1" Text="{Binding Status}" Margin="10,0" FontWeight="SemiBold"/>
+            <TextBlock Grid.Column="2" Text="{Binding SentCount, StringFormat='Sent: {0}'}" Margin="10,0" Foreground="SeaGreen"/>
+            <TextBlock Grid.Column="3" Text="{Binding FailedCount, StringFormat='Failed: {0}'}" Margin="10,0" Foreground="IndianRed"/>
+            <TextBlock Grid.Column="4" Text="{Binding StartedAt, StringFormat='{}{0:g}'}" Margin="10,0" Opacity="0.7"/>
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <Button Content="Export Report (CSV)" Command="{Binding ExportReportCommand}" HorizontalAlignment="Left"
+            ToolTip.Tip="Saves the selected run's per-recipient results (sent/failed, error messages, timestamps) as a CSV file."/>
+
+    <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap"/>
   </StackPanel>
 </UserControl>

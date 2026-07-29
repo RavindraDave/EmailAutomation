@@ -2,8 +2,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="EmailAutomation.UI.App"
              xmlns:local="using:EmailAutomation.UI"
-             RequestedThemeVariant="Default">
-             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+             RequestedThemeVariant="Light">
+             <!-- Pinned to Light: several panels (the nav menu, the resume-prompt banner) use
+                  hardcoded light background colors without a paired explicit foreground. Under
+                  "Default" (follow system theme), FluentTheme's Dark variant sets default text
+                  color to near-white to contrast ITS OWN dark chrome, which becomes invisible
+                  against these hardcoded light backgrounds. Every color in this app was chosen
+                  assuming a light theme; revisit if dark mode support is wanted later. -->
 
     <Application.DataTemplates>
         <local:ViewLocator/>

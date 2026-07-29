@@ -1,13 +1,16 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System;
 using Microsoft.Extensions.DependencyInjection;
-using EmailAutomation.Application.Services;
-using EmailAutomation.Infrastructure.Database;
 
 namespace EmailAutomation.UI.ViewModels;
 
+/// <summary>
+/// Resolves child ViewModels from the DI container on navigation ("ViewModel locator" pattern) -
+/// this is the one place an IServiceProvider is used directly, rather than each ViewModel
+/// reaching into Program.Services individually and silently no-op'ing when a service is missing.
+/// </summary>
 public class MainWindowViewModel : ViewModelBase
 {
+    private readonly IServiceProvider _serviceProvider;
     private ViewModelBase _currentViewModel;
 
     public ViewModelBase CurrentViewModel
@@ -16,32 +19,17 @@ public class MainWindowViewModel : ViewModelBase
         set => SetProperty(ref _currentViewModel, value);
     }
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(IServiceProvider serviceProvider)
     {
-        _currentViewModel = new DashboardViewModel();
+        _serviceProvider = serviceProvider;
+        _currentViewModel = _serviceProvider.GetRequiredService<DashboardViewModel>();
     }
 
-    public void NavigateToDashboard()
-    {
-        CurrentViewModel = new DashboardViewModel();
-    }
+    public void NavigateToDashboard() => CurrentViewModel = _serviceProvider.GetRequiredService<DashboardViewModel>();
 
-    public void NavigateToTemplates()
-    {
-        var repo = Program.Services?.GetService<IRepository>();
-        if (repo != null)
-        {
-            CurrentViewModel = new TemplateManagementViewModel(repo);
-        }
-    }
+    public void NavigateToTemplates() => CurrentViewModel = _serviceProvider.GetRequiredService<TemplateManagementViewModel>();
 
-    public void NavigateToBatch()
-    {
-        var batchService = Program.Services?.GetService<BatchExecutionService>();
-        var repo = Program.Services?.GetService<IRepository>();
-        if (batchService != null && repo != null)
-        {
-            CurrentViewModel = new BatchExecutionViewModel(batchService, repo);
-        }
-    }
+    public void NavigateToBatch() => CurrentViewModel = _serviceProvider.GetRequiredService<BatchExecutionViewModel>();
+
+    public void NavigateToSettings() => CurrentViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
 }
