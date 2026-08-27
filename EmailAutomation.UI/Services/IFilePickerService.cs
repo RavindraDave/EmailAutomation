@@ -9,4 +9,5 @@ public interface IFilePickerService
     Task<string?> PickOpenExcelFileAsync(string title);
     Task<string?> PickSaveExcelFileAsync(string title, string suggestedFileName);
     Task<string?> PickSaveCsvFileAsync(string title, string suggestedFileName);
+    Task<string?> PickOpenHtmlFileAsync(string title);
 }

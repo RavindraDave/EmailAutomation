@@ -26,8 +26,15 @@
       <TextBlock Text="Subject:" Margin="0,10,0,5" />
       <TextBox Text="{Binding SelectedTemplate.SubjectTemplate}" />
 
-      <TextBlock Text="Body (HTML):" Margin="0,10,0,5" />
-      <TextBox Text="{Binding SelectedTemplate.BodyTemplate}" Height="200" AcceptsReturn="True" TextWrapping="Wrap" />
+      <DockPanel Margin="0,10,0,5">
+        <TextBlock Text="Body (HTML - supports tables, styles, images; use {{VariableName}} for placeholders):" TextWrapping="Wrap" VerticalAlignment="Center" />
+      </DockPanel>
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+        <Button Content="Load HTML File..." Command="{Binding LoadHtmlFileCommand}" />
+        <Button Content="Preview in Browser" Command="{Binding PreviewInBrowserCommand}" Margin="10,0,0,0" />
+      </StackPanel>
+      <TextBox Text="{Binding SelectedTemplate.BodyTemplate}" Height="350" AcceptsReturn="True" TextWrapping="Wrap"
+                FontFamily="Consolas,Menlo,monospace" AcceptsTab="True" />
 
       <Button Content="Save" Command="{Binding SaveTemplateCommand}" Margin="0,20,0,0" HorizontalAlignment="Right" />
     </StackPanel>

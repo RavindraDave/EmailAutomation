@@ -18,6 +18,11 @@ public class AvaloniaFilePickerService : IFilePickerService
         Patterns = new[] { "*.csv" },
     };
 
+    private static readonly FilePickerFileType HtmlFileType = new("HTML File")
+    {
+        Patterns = new[] { "*.html", "*.htm" },
+    };
+
     public async Task<string?> PickOpenExcelFileAsync(string title)
     {
         var provider = GetStorageProvider();
@@ -72,6 +77,24 @@ public class AvaloniaFilePickerService : IFilePickerService
         });
 
         return result?.TryGetLocalPath();
+    }
+
+    public async Task<string?> PickOpenHtmlFileAsync(string title)
+    {
+        var provider = GetStorageProvider();
+        if (provider is null)
+        {
+            return null;
+        }
+
+        var results = await provider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = title,
+            AllowMultiple = false,
+            FileTypeFilter = new List<FilePickerFileType> { HtmlFileType },
+        });
+
+        return results.Count > 0 ? results[0].TryGetLocalPath() : null;
     }
 
     private static IStorageProvider? GetStorageProvider()

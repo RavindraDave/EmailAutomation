@@ -29,6 +29,7 @@
     <ProjectReference Include="..\EmailAutomation.Infrastructure\EmailAutomation.Infrastructure.csproj" />
     <ProjectReference Include="..\EmailAutomation.Application\EmailAutomation.Application.csproj" />
     <ProjectReference Include="..\EmailAutomation.Domain\EmailAutomation.Domain.csproj" />
+    <ProjectReference Include="..\EmailAutomation.UI\EmailAutomation.UI.csproj" />
   </ItemGroup>
 
 </Project>

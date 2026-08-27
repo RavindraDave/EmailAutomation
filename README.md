@@ -46,7 +46,12 @@ Any other column you add (e.g. `FirstName`, `InvoiceNo`) becomes usable in your 
 
 ### 2. Create a template
 
-In **Template Management**, click **New Template**, give it a name, write a default subject, and compose the body using `{{ColumnName}}` placeholders that match your spreadsheet's headers. Click **Save**.
+In **Template Management**, click **New Template**, give it a name, write a default subject, and compose the body using `{{ColumnName}}` placeholders that match your spreadsheet's headers. The body is HTML, so formatting - bold, colors, tables - is sent exactly as written; two buttons help with this:
+
+- **Load HTML File...** - import an existing `.html` file (e.g. exported from Word or another editor) straight into the body, instead of hand-typing markup.
+- **Preview in Browser** - opens the current body, rendered with placeholders left blank, in your default browser so you can check formatting and tables before sending.
+
+Click **Save**.
 
 ### 3. Preview before you send
 
@@ -98,6 +103,7 @@ Both scripts can be run from any OS, since .NET's publish supports cross-compili
 ## Features
 
 - Send batch emails via SMTP or the Gmail API, with retry on transient failures.
+- HTML email bodies with full formatting (styles, tables, images) preserved as-authored; import an existing `.html` file or preview the rendered body in your browser before sending.
 - Dry-run validation before sending: bad addresses, missing attachments, and unmatched template placeholders are all caught up front.
 - Configurable throttling and a daily send cap to stay within provider rate limits.
 - Pause, resume, and stop mid-batch; an interrupted run can be resumed later without re-sending already-delivered emails.

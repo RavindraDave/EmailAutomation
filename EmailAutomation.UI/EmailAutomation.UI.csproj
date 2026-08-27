@@ -34,4 +34,8 @@
     <ProjectReference Include="..\EmailAutomation.Infrastructure\EmailAutomation.Infrastructure.csproj" />
     <ProjectReference Include="..\EmailAutomation.Application\EmailAutomation.Application.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EmailAutomation.Tests" />
+  </ItemGroup>
 </Project>
