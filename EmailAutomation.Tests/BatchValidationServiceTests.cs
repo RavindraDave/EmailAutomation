@@ -104,6 +104,27 @@ public class BatchValidationServiceTests
     }
 
     [Fact]
+    public void Validate_AcceptsMultipleSemicolonSeparatedToAndCcAddresses()
+    {
+        var jobs = new List<EmailJob>
+        {
+            new()
+            {
+                RowNumber = 2,
+                To = "a@example.com;b@example.com",
+                Cc = "OPER0521@axisbank.in;421035@axisbank.in;Aniket9.Jadhav@axis.bank.in",
+                Variables = new Dictionary<string, string>(),
+            },
+        };
+        var template = new EmailTemplate { SubjectTemplate = "Hi", BodyTemplate = "Welcome" };
+
+        var report = CreateService(jobs).Validate("dummy.xlsx", template);
+
+        Assert.False(report.HasBlockingErrors);
+        Assert.Equal(1, report.ValidRows);
+    }
+
+    [Fact]
     public void Validate_NoRows_ReportsBlockingError()
     {
         var report = CreateService(new List<EmailJob>()).Validate("dummy.xlsx", new EmailTemplate());

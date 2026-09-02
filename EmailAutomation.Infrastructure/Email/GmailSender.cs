@@ -102,11 +102,14 @@ public class GmailSender : IEmailSender
     private MimeMessage CreateMimeMessage(EmailJob job, string subject, string bodyHtml)
     {
         var message = new MimeMessage();
-        message.To.Add(MailboxAddress.Parse(job.To));
-
-        if (!string.IsNullOrWhiteSpace(job.Cc))
+        foreach (var to in EmailAddressList.Split(job.To))
         {
-            message.Cc.Add(MailboxAddress.Parse(job.Cc));
+            message.To.Add(MailboxAddress.Parse(to));
+        }
+
+        foreach (var cc in EmailAddressList.Split(job.Cc))
+        {
+            message.Cc.Add(MailboxAddress.Parse(cc));
         }
 
         message.Subject = subject;
