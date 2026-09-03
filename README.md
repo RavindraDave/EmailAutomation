@@ -2,9 +2,15 @@
 
 A cross-platform desktop application (Windows and macOS) for bulk email automation, built with .NET 10 and Avalonia UI. Send personalized batches of email from an Excel spreadsheet via SMTP (Gmail App Password) or the Gmail API, with a safety-first workflow: preview before you send, throttle to avoid provider rate limits, resume an interrupted batch without duplicate sends, and export a report afterward.
 
+## Changelog
+
+- **v1.1.1** - Fixed Batch Execution rejecting rows with multiple semicolon/comma-separated addresses in the `To` or `Cc` column.
+- **v1.1.0** - HTML template editing: import an existing `.html` file into a template body, and preview the rendered body in your browser before sending. Settings validation, batch pause/resume, and reporting improvements.
+- **v1.0.0** - Initial release.
+
 ## Installing
 
-Download the build for your platform (v1.1.0), or build it yourself - see [Building & Packaging](#building--packaging) below. All releases are listed on the [Releases](../../releases) page.
+Download the build for your platform (v1.1.1), or build it yourself - see [Building & Packaging](#building--packaging) below. All releases are listed on the [Releases](../../releases) page.
 
 - **Windows (x64)**: [EmailAutomation-win-x64.zip](https://github.com/RavindraDave/EmailAutomation/releases/download/v1.1.1/EmailAutomation-win-x64.zip) - unzip and run `EmailAutomation.UI.exe`. No .NET installation required (it's self-contained).
 - **macOS (Apple Silicon)**: [EmailAutomation-macOS-arm64.zip](https://github.com/RavindraDave/EmailAutomation/releases/download/v1.1.1/EmailAutomation-macOS-arm64.zip) - unzip `EmailAutomation.app` and drag it into `Applications`, or run it in place.
@@ -37,7 +43,7 @@ On the **Batch Execution** tab, click **Download Sample Template** to save a rea
 | Column | Required? | Purpose |
 |---|---|---|
 | `To` | Yes | Recipient email address |
-| `Cc` | No | Optional CC address |
+| `Cc` | No | Optional CC address(es) - separate multiple with `;` or `,` |
 | `Subject` | No | Overrides the template's default subject for this row only |
 | `AttachmentPath` | No | Absolute path to a file to attach |
 | `IsEnabled` | No | `TRUE`/`FALSE` - set `FALSE` to skip a row without deleting it |
