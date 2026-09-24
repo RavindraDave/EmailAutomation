@@ -2,6 +2,8 @@
 
 A cross-platform desktop application (Windows and macOS) for bulk email automation, built with .NET 10 and Avalonia UI. Send personalized batches of email from an Excel spreadsheet via SMTP (Gmail App Password) or the Gmail API, with a safety-first workflow: preview before you send, throttle to avoid provider rate limits, resume an interrupted batch without duplicate sends, and export a report afterward.
 
+> **Next generation:** a cross-platform successor, **[Postloom](https://github.com/RavindraDave/postloom)** (Electron + TypeScript, visual email designer, multiple accounts and senders), is being planned. See its [plan](https://github.com/RavindraDave/postloom/blob/main/docs/PLAN.md). This app remains supported until Postloom reaches feature parity, and Postloom will be able to import its data.
+
 ## Changelog
 
 - **v1.1.1** - Fixed Batch Execution rejecting rows with multiple semicolon/comma-separated addresses in the `To` or `Cc` column.
